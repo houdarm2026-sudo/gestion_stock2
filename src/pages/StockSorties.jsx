@@ -1,3 +1,5 @@
+import {FiEye,FiTrash2,FiDollarSign,FiBarChart2 ,FiPackage } from 'react-icons/fi';
+
 import './StockSorties1.css';
 import { useState, useEffect } from 'react';
 import axios from 'axios';
@@ -203,7 +205,7 @@ const StockSorties = () => {
       <div className="header-card">
         <div className="header-content">
           <div>
-            <h1>📤 Stock Exits Management</h1>
+            <h1><FiBarChart2/> Stock Exits Management</h1>
             <p className="subtitle">Manage outgoing stock and warehouse exits efficiently.</p>
           </div>
           <button className="btn-primary" onClick={openAddModal}>
@@ -233,15 +235,15 @@ const StockSorties = () => {
             <p className="stat-label">Total Exits</p>
             <p className="stat-value">{totalSorties.toLocaleString()}</p>
           </div>
-          <div className="stat-icon">📤</div>
+          <div className="stat-icon"><FiPackage/></div>
         </div>
 
         <div className="stat-card">
           <div>
             <p className="stat-label">Value MTD</p>
-            <p className="stat-value">${totalValueMTD.toLocaleString()}</p>
+            <p className="stat-value">{totalValueMTD.toLocaleString()}</p>
           </div>
-          <div className="stat-icon">💰</div>
+          <div className="stat-icon">DH</div>
         </div>
 
         <div className="stat-card">
@@ -249,7 +251,7 @@ const StockSorties = () => {
             <p className="stat-label">Total Quantity</p>
             <p className="stat-value">{totalQuantity.toLocaleString()} units</p>
           </div>
-          <div className="stat-icon">📦</div>
+          <div className="stat-icon"><FiPackage/></div>
         </div>
       </div>
 
@@ -288,10 +290,10 @@ const StockSorties = () => {
                     <td>{getArticleName(sortie.article_id)}</td>
                     <td>{sortie.qantite_sortie?.toLocaleString()} units</td>
                     <td>${parseFloat(sortie.prix_sortie || 0).toFixed(2)}</td>
-                    <td className="total-cell">${totalValue.toLocaleString()}</td>
+                    <td className="total-cell">{totalValue.toLocaleString()}</td>
                     <td className="actions-cell">
-                      <button className="action-btn view" onClick={() => openViewModal(sortie)}>👁️</button>
-                      <button className="action-btn delete" onClick={() => setDeleteConfirm(sortie)}>🗑️</button>
+                      <button className="action-btn view" onClick={() => openViewModal(sortie)}><FiEye size={18}/></button>
+                      <button className="action-btn delete" onClick={() => setDeleteConfirm(sortie)}><FiTrash2 size={18}/></button>
                     </td>
                   </tr>
                 );

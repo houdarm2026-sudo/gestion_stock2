@@ -1,7 +1,9 @@
+import {FiEye,FiEdit2,FiTrash2,FiPackage, FiAlertTriangle  } from 'react-icons/fi';
 import './ArticleManager1.css';
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { toast, Toaster } from 'react-hot-toast';
+import { FiSearch } from 'react-icons/fi';
 
 const API_BASE_URL = 'http://localhost:8000/api';
 
@@ -173,7 +175,7 @@ const ArticleManager = () => {
       <div className="header-card">
         <div className="header-content">
           <div>
-            <h1>📦 Articles Management</h1>
+            <h1>📥 Articles Management</h1>
             <p className="subtitle">Manage products and monitor inventory stock efficiently.</p>
           </div>
           <button className="btn-primary" onClick={openAddModal}>
@@ -201,9 +203,8 @@ const ArticleManager = () => {
         <div className="stat-card">
           <div>
             <p className="stat-label">Total Value</p>
-            <p className="stat-value">€ {totalValue.toLocaleString()}</p>
-          </div>
-          <div className="stat-icon">💰</div>
+            <p className="stat-value">{totalValue.toLocaleString()} dh </p>
+          </div>  
         </div>
         
         <div className="stat-card">
@@ -211,7 +212,7 @@ const ArticleManager = () => {
             <p className="stat-label">Low Stock Alerts</p>
             <p className="stat-value">{lowStockAlerts} Articles</p>
           </div>
-          <div className="stat-icon">⚠️</div>
+          <div className="stat-icon">< FiAlertTriangle size= {18}/></div>
         </div>
         
         <div className="stat-card">
@@ -219,7 +220,7 @@ const ArticleManager = () => {
             <p className="stat-label">Total Articles</p>
             <p className="stat-value">{articles.length}</p>
           </div>
-          <div className="stat-icon">📦</div>
+          <div className="stat-icon"><FiPackage size={18} /></div>
         </div>
       </div>
 
@@ -259,16 +260,16 @@ const ArticleManager = () => {
                     <td>{article.quantite_en_stock_reel.toLocaleString()}</td>
                     <td>{article.stock_min}</td>
                     <td>{article.stock_max}</td>
-                    <td>€ {parseFloat(article.prix || 0).toFixed(2)}</td>
+                    <td>{parseFloat(article.prix || 0).toFixed(2)} dh </td>
                     <td>
                       <span className={`badge badge-${status.color}`}>
                         {status.label}
                       </span>
                     </td>
                     <td className="actions-cell">
-                      <button className="action-btn view" onClick={() => openViewModal(article)}>👁️</button>
-                      <button className="action-btn edit" onClick={() => openEditModal(article)}>✏️</button>
-                      <button className="action-btn delete" onClick={() => setDeleteConfirm(article)}>🗑️</button>
+                      <button className="action-btn view" onClick={() => openViewModal(article)}><FiEye size={18}/></button>
+                      <button className="action-btn edit" onClick={() => openEditModal(article)}><FiEdit2 size={18}/></button>
+                      <button className="action-btn delete" onClick={() => setDeleteConfirm(article)}><FiTrash2 size={18}/></button>
                     </td>
                   </tr>
                 );
@@ -362,7 +363,7 @@ const ArticleManager = () => {
                   </div>
                   <div className="view-field">
                     <label>Prix</label>
-                    <p>€ {parseFloat(selectedArticle?.prix || 0).toFixed(2)}</p>
+                    <p>{parseFloat(selectedArticle?.prix || 0).toFixed(2)} dh </p>
                   </div>
                 </>
               ) : (

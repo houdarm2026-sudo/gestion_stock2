@@ -1,3 +1,4 @@
+import {FiEye,FiTrash2,FiDollarSign,FiBarChart2 ,FiPackage } from 'react-icons/fi';
 import './StockEntries1.css';
 import { useState, useEffect } from "react";
 import axios from "axios";
@@ -107,6 +108,12 @@ const StockEntries = () => {
   };
 
   const createEntry = async () => {
+    // Validation
+    if (!formData.num_bon_entree || !formData.date_entree || !formData.article_id || !formData.qantite_entree || !formData.prix_entree) {
+      toast.error('Please fill in all fields');
+      return;
+    }
+
     try {
       const response = await api.post('/entrees', formData);
       toast.success('Stock entry created successfully! Stock updated automatically.');
@@ -144,7 +151,6 @@ const StockEntries = () => {
   const totalQuantity = entries.reduce((sum, entry) =>
     sum + entry.qantite_entree, 0
   );
-  const warehouseCap = articles.length > 0 ? Math.min(100, Math.round((entries.length / (articles.length * 10)) * 100)) : 0;
 
   return (
     <div className="entries-page">
@@ -178,38 +184,37 @@ const StockEntries = () => {
       </div>
 
       {/* Stats Cards */}
-     {/* Stats Cards */}
-<div className="stats-grid" style={{
-  display: 'flex', 
-  justifyContent: 'center', 
-  alignItems: 'center', 
-  gap: '20px',
-  marginBottom: '24px',
-  flexWrap: 'wrap'
-}}>
-  <div className="stat-card" style={{ flex: '0 1 280px' }}>
-    <div>
-      <p className="stat-label">Total Entries</p>
-      <p className="stat-value">{totalEntries.toLocaleString()}</p>
-    </div>
-    <div className="stat-icon">📊</div>
-  </div>
+      <div className="stats-grid" style={{
+        display: 'flex', 
+        justifyContent: 'center', 
+        alignItems: 'center', 
+        gap: '20px',
+        marginBottom: '24px',
+        flexWrap: 'wrap'
+      }}>
+        <div className="stat-card" style={{ flex: '0 1 280px' }}>
+          <div>
+            <p className="stat-label">Total Entries</p>
+            <p className="stat-value">{totalEntries.toLocaleString()}</p>
+          </div>
+          <div className="stat-icon"><FiBarChart2 /></div>
+        </div>
 
-  <div className="stat-card" style={{ flex: '0 1 280px' }}>
-    <div>
-      <p className="stat-label">Value MTD</p>
-      <p className="stat-value">${totalValueMTD.toLocaleString()}</p>
-    </div>
-    <div className="stat-icon">💰</div>
-  </div>
+        <div className="stat-card" style={{ flex: '0 1 280px' }}>
+          <div>
+            <p className="stat-label">Value MTD</p>
+            <p className="stat-value">{totalValueMTD.toLocaleString()}</p>
+          </div>
+          <div className="stat-icon" size={10}>DH</div>
+        </div>
 
-  <div className="stat-card" style={{ flex: '0 1 280px' }}>
-    <div>
-      <p className="stat-label">Total Quantity</p>
-      <p className="stat-value">{totalQuantity.toLocaleString()} units</p>
-    </div>
-    <div className="stat-icon">📦</div>
-  </div>
+        <div className="stat-card" style={{ flex: '0 1 280px' }}>
+          <div>
+            <p className="stat-label">Total Quantity</p>
+            <p className="stat-value">{totalQuantity.toLocaleString()} units</p>
+          </div>
+          <div className="stat-icon"><FiPackage /></div>
+        </div>
       </div>
 
       {/* Table */}
@@ -246,11 +251,11 @@ const StockEntries = () => {
                     <td>{new Date(entry.date_entree).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}</td>
                     <td>{getArticleName(entry.article_id)}</td>
                     <td>{entry.qantite_entree?.toLocaleString()} units</td>
-                    <td>${parseFloat(entry.prix_entree).toFixed(2)}</td>
+                    <td>${parseFloat(entry.prix_entree || 0).toFixed(2)}</td>
                     <td className="total-cell">${totalValue.toLocaleString()}</td>
                     <td className="actions-cell">
-                      <button className="action-btn view" onClick={() => openViewModal(entry)}>👁️</button>
-                      <button className="action-btn delete" onClick={() => setDeleteConfirm(entry)}>🗑️</button>
+                      <button className="action-btn view" onClick={() => openViewModal(entry)}><FiEye size={18}/></button>
+                      <button className="action-btn delete" onClick={() => setDeleteConfirm(entry)}><FiTrash2 size={18}/></button>
                     </td>
                   </tr>
                 );
@@ -299,7 +304,7 @@ const StockEntries = () => {
                 disabled={currentPage === totalPages}
                 className="page-btn"
               >
-                Next → 
+                Next →
               </button>
             </div>
           </div>
@@ -339,7 +344,7 @@ const StockEntries = () => {
                   </div>
                   <div className="view-field">
                     <label>Prix Entrée</label>
-                    <p>${parseFloat(selectedEntry?.prix_entree).toFixed(2)}</p>
+                    <p>${parseFloat(selectedEntry?.prix_entree || 0).toFixed(2)}</p>
                   </div>
                   <div className="view-field">
                     <label>Valeur Totale</label>
@@ -351,53 +356,59 @@ const StockEntries = () => {
               ) : (
                 <>
                   <div className="form-group">
-                    <label>Num Bon Entrée </label>
-                    <input type="text"  name="num_bon_entree"
+                    <label>Num Bon Entrée *</label>
+                    <input 
+                      type="text"  
+                      name="num_bon_entree"
                       value={formData.num_bon_entree}
                       onChange={handleInputChange}
                       placeholder="Ex: #BE-2024-001"
+                      required
                     />
                   </div>
 
                   <div className="form-group">
-                    <label>Date Entrée </label>
+                    <label>Date Entrée *</label>
                     <input
                       type="date"
                       name="date_entree"
                       value={formData.date_entree}
                       onChange={handleInputChange}
+                      required
                     />
                   </div>
 
                   <div className="form-group">
-                    <label>Article </label>
+                    <label>Article *</label>
                     <select
                       name="article_id"
                       value={formData.article_id}
                       onChange={handleInputChange}
+                      required
                     >
                       <option value="">Select an article</option>
                       {articles.map(article => (
                         <option key={article.id} value={article.id}>
-                          {article.code_article} - {article.designation}
+                          {article.code_article} - {article.designation} (Stock: {article.quantite_en_stock_reel})
                         </option>
                       ))}
                     </select>
                   </div>
 
                   <div className="form-group">
-                    <label>Quantité Entrée </label>
+                    <label>Quantité Entrée *</label>
                     <input
                       type="number"
                       name="qantite_entree"
                       value={formData.qantite_entree}
                       onChange={handleInputChange}
                       placeholder="Enter quantity"
+                      required
                     />
                   </div>
 
                   <div className="form-group">
-                    <label>Prix Entrée </label>
+                    <label>Prix Entrée *</label>
                     <input
                       type="number"
                       step="0.01"
@@ -405,13 +416,14 @@ const StockEntries = () => {
                       value={formData.prix_entree}
                       onChange={handleInputChange}
                       placeholder="Enter price per unit"
+                      required
                     />
                   </div>
 
                   {formData.qantite_entree && formData.prix_entree && (
                     <div className="preview-total">
                       <label>Valeur Totale:</label>
-                      <p>${(parseFloat(formData.qantite_entree) * parseFloat(formData.prix_entree)).toLocaleString()}</p>
+                      <p>{(parseFloat(formData.qantite_entree) * parseFloat(formData.prix_entree)).toLocaleString()}dh </p>
                     </div>
                   )}
                 </>

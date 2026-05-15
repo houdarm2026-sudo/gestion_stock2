@@ -1,3 +1,4 @@
+import { FiPackage, FiDownload, FiUpload, FiDollarSign ,} from 'react-icons/fi';
 import axios from 'axios';
 import { Link } from 'react-router-dom';
 import './Dashboard1.css';
@@ -31,11 +32,9 @@ const Dashboard = () => {
         try {
             setLoading(true);
 
-            // ✅ Correction 1: '/articles' au lieu de articles
             const articleRes = await api.get('/articles');
             const articles = articleRes.data;
 
-            // ✅ Correction 2: '/entrees' au lieu de '/articles'
             const entriesRes = await api.get('/entrees');
             const entries = entriesRes.data;
 
@@ -54,9 +53,9 @@ const Dashboard = () => {
             });
             
             const activities = [
-                ...entries.slice(0, 3).map(e => ({ type: 'entry', data: e, date: e.date_entree })),
-                ...exits.slice(0, 3).map(s => ({ type: 'exit', data: s, date: s.date_sortie }))
-            ].sort((a, b) => new Date(b.date) - new Date(a.date)).slice(0, 5);
+                ...entries.slice(0, 5).map(e => ({ type: 'entry', data: e, date: e.date_entree })),
+                ...exits.slice(0, 5).map(s => ({ type: 'exit', data: s, date: s.date_sortie }))
+            ].sort((a, b) => new Date(b.date) - new Date(a.date)).slice(0, 6);
             
             setRecentActivities(activities);
         
@@ -67,72 +66,80 @@ const Dashboard = () => {
         }
     };
     
-    const getArticleName = (articleId, articles) => {
-        return `Article #${articleId}`;
-    };
-    
     return (
         <div className='dashboard'>
+            {/* Stats Cards */}
             <div className='stats-grid-dashboard'>
                 <div className='stat-card-dashboard'>
-                    <div className='stat-icon-dashboard'>📦</div>
+                    <div className='stat-icon-dashboard'>
+                        <FiPackage size={32} />
+                    </div>
                     <div className='stat-info-dashboard'>
-                        <h3>{stats.articles}</h3>
+                        <h3>{stats.articles.toLocaleString()}</h3>
                         <p>Total Articles</p>
                     </div>
                 </div>
+
                 <div className='stat-card-dashboard'>
-                    <div className='stat-icon-dashboard'>📥</div>
+                    <div className='stat-icon-dashboard'>
+                        <FiDownload size={32} />
+                    </div>
                     <div className='stat-info-dashboard'>
-                        <h3>{stats.entries}</h3>
+                        <h3>{stats.entries.toLocaleString()}</h3>
                         <p>Stock Entries</p>
                     </div>
                 </div>
 
                 <div className='stat-card-dashboard'>
-                    <div className='stat-icon-dashboard'>📤</div>
+                    <div className='stat-icon-dashboard'>
+                        <FiUpload size={32} />
+                    </div>
                     <div className='stat-info-dashboard'>
-                        <h3>{stats.exits}</h3>
+                        <h3>{stats.exits.toLocaleString()}</h3>
                         <p>Stock Exits</p>
                     </div>
                 </div>
+
                 <div className='stat-card-dashboard'>
-                    <div className='stat-icon-dashboard'>💰</div>
+                    <div className='stat-icon-dashboard'>
+                       Dh
+                    </div>
                     <div className='stat-info-dashboard'>
-                        <h3>€ {stats.totalStockValue.toLocaleString()}</h3>
+                        <h3>{stats.totalStockValue.toLocaleString()} </h3>
                         <p>Total Stock Value</p>
                     </div>
                 </div>
             </div>
             
+            {/* Action Cards */}
             <div className='dashboard-actions'>
                 <Link to='/articles' className='action-card'>
-                    <span>📦</span>
+                    <span><FiPackage size={48} /></span>
                     <h3>Manage Articles</h3>
                     <p>View, add, edit or delete articles</p>
                 </Link>
 
                 <Link to='/stock-entries' className='action-card'>
-                    <span>📥</span>
+                    <span><FiDownload size={48} /></span>
                     <h3>Stock Entries</h3>
                     <p>Record incoming stock movements</p>
                 </Link>
 
-                {/* ✅ Correction 3: Icône et texte corrects */}
                 <Link to='/stock-exits' className='action-card'>
-                    <span>📤</span>
+                    <span><FiUpload size={48} /></span>
                     <h3>Stock Exits</h3>
                     <p>Record outgoing stock movements</p>
                 </Link>
             </div>
             
+            {/* Recent Activities */}
             <div className='recent-activities'>
-                <h3>Recent Activities</h3>
+                <h3> Recent Activities</h3>
                 <div className='activities-list'>
                     {loading ? (
-                        <div>Loading...</div>
+                        <div className="loading-spinner">⏳ Loading activities...</div>
                     ) : recentActivities.length === 0 ? (
-                        <div>No recent activities</div>
+                        <div className="empty-activities">No recent activities</div>
                     ) : (
                         recentActivities.map((activity, index) => (
                             <div key={index} className='activity-item'>
@@ -141,7 +148,11 @@ const Dashboard = () => {
                                 </div>
                                 <div className='activity-details'>
                                     <p>{activity.type === 'entry' ? 'Stock Entry' : 'Stock Exit'}</p>
-                                    <small>{new Date(activity.date).toLocaleDateString()}</small>
+                                    <small>{new Date(activity.date).toLocaleDateString('fr-FR', {
+                                        day: '2-digit',
+                                        month: 'short',
+                                        year: 'numeric'
+                                    })}</small>
                                 </div>
                             </div>
                         ))
