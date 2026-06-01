@@ -184,18 +184,37 @@ const ArticleManager = () => {
         </div>
 
         {/* Search */}
-        <div className="search-wrapper">
-          <input
-            type="text"
-            placeholder="🔍 Search by code or designation..."
-            value={searchTerm}
-            onChange={(e) => {
-              setSearchTerm(e.target.value);
-              setCurrentPage(1);
-            }}
-            className="search-input"
-          />
-        </div>
+       <div style={{ position: "relative", display: "inline-block"}}>
+  <div style={{ position: "absolute", left: "12px", top: "50%", transform: "translateY(-50%)", color: "#888", pointerEvents: "none", display: "flex", alignItems: "center" }}>
+    <FiSearch size={18} />
+  </div>
+  <input
+    type="text"
+    placeholder="Search by code or designation..."
+    value={searchTerm}
+    onChange={(e) => {
+      setSearchTerm(e.target.value);
+      setCurrentPage(1);
+    }}
+    style={{
+      padding: "10px 10px 10px 36px",
+      border: "1px solid #ccc",
+      borderRadius: "8px",
+      fontSize: "14px",
+      outline: "none",
+      transition: "all 0.2s ease",
+      width:"1000px"
+    }}
+    onFocus={(e) => {
+      e.target.style.borderColor = "#007bff";
+      e.target.style.boxShadow = "0 0 0 2px rgba(0, 123, 255, 0.25)";
+    }}
+    onBlur={(e) => {
+      e.target.style.borderColor = "#ccc";
+      e.target.style.boxShadow = "none";
+    }}
+  />
+</div>
       </div>
 
       {/* Stats Cards */}

@@ -1,10 +1,9 @@
-import {FiEye,FiTrash2,FiDollarSign,FiBarChart2 ,FiPackage } from 'react-icons/fi';
-
+import { FiEye, FiTrash2, FiEdit2, FiBarChart2, FiPackage, FiSearch } from 'react-icons/fi';
 import './StockSorties1.css';
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { toast, Toaster } from 'react-hot-toast';
-
+import { FaBan, FaExclamationTriangle, FaCheckCircle, FaInfoCircle, FaBoxes } from "react-icons/fa";
 const API_BASE_URL = 'http://localhost:8000/api';
 
 const StockSorties = () => {
@@ -18,7 +17,6 @@ const StockSorties = () => {
   const [deleteConfirm, setDeleteConfirm] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [sortiePerPage] = useState(10);
-  const [stockAvailable, setStockAvailable] = useState(0);
   const [stockStatus, setStockStatus] = useState({ available: false, message: '' });
   const [formData, setFormData] = useState({
     num_bon_sortie: '',
@@ -78,37 +76,50 @@ const StockSorties = () => {
     return article ? article.code_article : '';
   };
 
-  // Vérifier le stock disponible quand l'article ou la quantité change
+  // Vérification du stock
   useEffect(() => {
     if (formData.article_id && formData.qantite_sortie) {
       const stock = getArticleStock(parseInt(formData.article_id));
       const quantity = parseFloat(formData.qantite_sortie);
-      setStockAvailable(stock);
       
-      if (quantity > stock) {
-        setStockStatus({ available: false, message: `⚠️ Stock insuffisant! Disponible: ${stock} units` });
-      } else if (quantity === stock) {
-        setStockStatus({ available: true, message: `⚡ Stock sera épuisé après cette sortie (${stock} units)` });
-      } else if (quantity <= stock * 0.2) {
-        setStockStatus({ available: true, message: `⚠️ Attention: Stock faible après sortie (${stock - quantity} units restants)` });
-      } else {
-        setStockStatus({ available: true, message: `✅ Stock suffisant. Restant: ${stock - quantity} units` });
-      }
-    } else if (formData.article_id) {
-      const stock = getArticleStock(parseInt(formData.article_id));
-      setStockAvailable(stock);
-      setStockStatus({ available: true, message: `📦 Stock disponible: ${stock} units` });
-    } else {
-      setStockStatus({ available: false, message: '' });
-    }
-  }, [formData.article_id, formData.qantite_sortie]);
+     if (quantity > stock) {
+  setStockStatus({ 
+    available: false, 
+    message: <><FaBan className="text-red-500 inline mr-1" /> Stock insuffisant! Disponible: {stock} unités</>
+  });
+} else if (quantity === stock) {
+  setStockStatus({ 
+    available: true, 
+    message: <><FaExclamationTriangle className="text-yellow-500 inline mr-1" /> Stock sera épuisé après cette sortie ({stock} unités)</>
+  });
+} else if (stock - quantity <= stock * 0.2) {
+  setStockStatus({ 
+    available: true, 
+    message: <><FaExclamationTriangle className="text-orange-500 inline mr-1" /> Attention: Stock faible après sortie ({stock - quantity} unités restants)</>
+  });
+} else {
+  setStockStatus({ 
+    available: true, 
+    message: <><FaCheckCircle className="text-green-500 inline mr-1" /> Stock suffisant. Restant: {stock - quantity} unités</>
+  });
+}
+} else if (formData.article_id) {
+  const stock = getArticleStock(parseInt(formData.article_id));
+  setStockStatus({ 
+    available: true, 
+    message: <><FaInfoCircle className="text-blue-500 inline mr-1" /> Stock disponible: {stock} unités</>
+  });
+} else {
+  setStockStatus({ available: false, message: '' });
+}
+}, [formData.article_id, formData.qantite_sortie, articles]);  // ← Ajoute cette ligne
 
+  // Filtrage et pagination
   const filteredSorties = sorties.filter(sort =>
     sort.num_bon_sortie?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     getArticleName(sort.article_id).toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  // Pagination
   const indexOfLastSort = currentPage * sortiePerPage;
   const indexOfFirstSort = indexOfLastSort - sortiePerPage;
   const currentSorties = filteredSorties.slice(indexOfFirstSort, indexOfLastSort);
@@ -131,7 +142,6 @@ const StockSorties = () => {
       prix_sortie: '',
     });
     setStockStatus({ available: false, message: '' });
-    setStockAvailable(0);
   };
 
   const openAddModal = () => {
@@ -146,32 +156,81 @@ const StockSorties = () => {
     setIsModalOpen(true);
   };
 
+  const openEditModal = (sortie) => {
+    setModalMode('edit');
+    setSelectedSortie(sortie);
+    setFormData({
+      num_bon_sortie: sortie.num_bon_sortie,
+      date_sortie: sortie.date_sortie.split('T')[0],
+      article_id: sortie.article_id,
+      qantite_sortie: sortie.qantite_sortie,
+      prix_sortie: sortie.prix_sortie,
+    });
+    setIsModalOpen(true);
+  };
+
   const createSortie = async () => {
-    // Vérification du stock avant envoi
     const stock = getArticleStock(parseInt(formData.article_id));
-    const quantity = parseFloat(formData.qantite_sortie);
+    const quantity = parseInt(formData.qantite_sortie);
     
     if (quantity > stock) {
       toast.error(`Stock insuffisant! Quantité disponible: ${stock} units`);
       return;
     }
 
+    const dataToSend = {
+      num_bon_sortie: formData.num_bon_sortie,
+      date_sortie: formData.date_sortie,
+      article_id: parseInt(formData.article_id),
+      qantite_sortie: parseInt(formData.qantite_sortie),
+      prix_sortie: parseFloat(formData.prix_sortie)
+    };
+
     try {
-      const response = await api.post('/sorties', formData);
-      toast.success('Stock sortie created successfully! Stock updated automatically.');
+      await api.post('/sorties', dataToSend);
+      toast.success('Sortie créée avec succès!');
       fetchSorties();
-      fetchArticles(); // Recharger les articles pour mettre à jour les stocks
+      fetchArticles();
       setIsModalOpen(false);
       resetForm();
     } catch (error) {
-      if (error.response?.data?.errors) {
-        Object.values(error.response.data.errors).forEach(err => {
-          toast.error(err[0]);
-        });
-      } else if (error.response?.data?.message) {
+      if (error.response?.data?.message) {
         toast.error(error.response.data.message);
       } else {
-        toast.error('Failed to create sortie');
+        toast.error('Erreur lors de la création');
+      }
+    }
+  };
+
+  const updateSortie = async () => {
+    const stock = getArticleStock(parseInt(formData.article_id));
+    const quantity = parseInt(formData.qantite_sortie);
+    
+    if (quantity > stock) {
+      toast.error(`Stock insuffisant! Quantité disponible: ${stock} units`);
+      return;
+    }
+
+    const dataToSend = {
+      num_bon_sortie: formData.num_bon_sortie,
+      date_sortie: formData.date_sortie,
+      article_id: parseInt(formData.article_id),
+      qantite_sortie: parseInt(formData.qantite_sortie),
+      prix_sortie: parseFloat(formData.prix_sortie)
+    };
+
+    try {
+      await api.put(`/sorties/${selectedSortie.id}`, dataToSend);
+      toast.success('Sortie modifiée avec succès!');
+      fetchSorties();
+      fetchArticles();
+      setIsModalOpen(false);
+      resetForm();
+    } catch (error) {
+      if (error.response?.data?.message) {
+        toast.error(error.response.data.message);
+      } else {
+        toast.error('Erreur lors de la modification');
       }
     }
   };
@@ -179,24 +238,20 @@ const StockSorties = () => {
   const deleteSortie = async () => {
     try {
       await api.delete(`/sorties/${deleteConfirm.id}`);
-      toast.success('Exit deleted successfully');
+      toast.success('Sortie supprimée avec succès');
       fetchSorties();
-      fetchArticles(); // Recharger les articles pour mettre à jour les stocks
+      fetchArticles();
       setDeleteConfirm(null);
     } catch (error) {
-      toast.error('Failed to delete entry');
+      toast.error('Erreur lors de la suppression');
     }
   };
 
-  // Calculs pour les statistiques
+  // Statistiques
   const totalSorties = sorties.length;
-  const totalValueMTD = sorties.reduce((sum, sort) =>
-    sum + (sort.qantite_sortie * sort.prix_sortie), 0
-  );
- const totalQuantity = sorties.reduce((sum, sort) => {
-  const quantity = parseFloat(sort.qantite_sortie) || 0;
-  return sum + quantity;
-}, 0);
+  const totalValueMTD = sorties.reduce((sum, sort) => sum + (sort.qantite_sortie * sort.prix_sortie), 0);
+  const totalQuantity = sorties.reduce((sum, sort) => sum + (parseFloat(sort.qantite_sortie) || 0), 0);
+
   return (
     <div className="sorties-page">
       <Toaster position="top-right" />
@@ -205,7 +260,7 @@ const StockSorties = () => {
       <div className="header-card">
         <div className="header-content">
           <div>
-            <h1><FiBarChart2/> Stock Exits Management</h1>
+            <h1><FiBarChart2 /> Stock Exits Management</h1>
             <p className="subtitle">Manage outgoing stock and warehouse exits efficiently.</p>
           </div>
           <button className="btn-primary" onClick={openAddModal}>
@@ -214,16 +269,26 @@ const StockSorties = () => {
         </div>
 
         {/* Search */}
-        <div className="search-wrapper">
+        <div style={{ position: "relative", display: "inline-block", width: "100%" }}>
+          <div style={{ position: "absolute", left: "12px", top: "50%", transform: "translateY(-50%)", color: "#888", pointerEvents: "none" }}>
+            <FiSearch size={18} />
+          </div>
           <input
             type="text"
-            placeholder="🔍 Search by exit number or article..."
+            placeholder="Search by exit number or article..."
             value={searchTerm}
             onChange={(e) => {
               setSearchTerm(e.target.value);
               setCurrentPage(1);
             }}
-            className="search-input"
+            style={{
+              width: "100%",
+              padding: "10px 10px 10px 36px",
+              border: "1px solid #ccc",
+              borderRadius: "8px",
+              fontSize: "14px",
+              outline: "none",
+            }}
           />
         </div>
       </div>
@@ -235,13 +300,13 @@ const StockSorties = () => {
             <p className="stat-label">Total Exits</p>
             <p className="stat-value">{totalSorties.toLocaleString()}</p>
           </div>
-          <div className="stat-icon"><FiPackage/></div>
+          <div className="stat-icon"><FiPackage /></div>
         </div>
 
         <div className="stat-card">
           <div>
             <p className="stat-label">Value MTD</p>
-            <p className="stat-value">{totalValueMTD.toLocaleString()}</p>
+            <p className="stat-value">{totalValueMTD.toLocaleString()} </p>
           </div>
           <div className="stat-icon">DH</div>
         </div>
@@ -251,7 +316,7 @@ const StockSorties = () => {
             <p className="stat-label">Total Quantity</p>
             <p className="stat-value">{totalQuantity.toLocaleString()} units</p>
           </div>
-          <div className="stat-icon"><FiPackage/></div>
+          <div className="stat-icon"><FiPackage /></div>
         </div>
       </div>
 
@@ -271,13 +336,13 @@ const StockSorties = () => {
           </thead>
           <tbody>
             {loading ? (
-              <tr key="loading">
+              <tr>
                 <td colSpan="7" className="loading-cell">
                   <div className="spinner"></div>
                 </td>
               </tr>
             ) : currentSorties.length === 0 ? (
-              <tr key="empty">
+              <tr>
                 <td colSpan="7" className="empty-cell">No exits found</td>
               </tr>
             ) : (
@@ -286,14 +351,21 @@ const StockSorties = () => {
                 return (
                   <tr key={sortie.id}>
                     <td className="code-cell">{sortie.num_bon_sortie}</td>
-                    <td>{new Date(sortie.date_sortie).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}</td>
+                    <td>{new Date(sortie.date_sortie).toLocaleDateString('fr-FR')}</td>
                     <td>{getArticleName(sortie.article_id)}</td>
                     <td>{sortie.qantite_sortie?.toLocaleString()} units</td>
-                    <td>${parseFloat(sortie.prix_sortie || 0).toFixed(2)}</td>
-                    <td className="total-cell">{totalValue.toLocaleString()}</td>
+                    <td>{parseFloat(sortie.prix_sortie || 0).toFixed(2)} DH</td>
+                    <td className="total-cell">{totalValue.toLocaleString()} DH</td>
                     <td className="actions-cell">
-                      <button className="action-btn view" onClick={() => openViewModal(sortie)}><FiEye size={18}/></button>
-                      <button className="action-btn delete" onClick={() => setDeleteConfirm(sortie)}><FiTrash2 size={18}/></button>
+                      <button className="action-btn view" onClick={() => openViewModal(sortie)}>
+                        <FiEye size={18} />
+                      </button>
+                      <button className="action-btn edit" onClick={() => openEditModal(sortie)}>
+                        <FiEdit2 size={18} />
+                      </button>
+                      <button className="action-btn delete" onClick={() => setDeleteConfirm(sortie)}>
+                        <FiTrash2 size={18} />
+                      </button>
                     </td>
                   </tr>
                 );
@@ -309,11 +381,7 @@ const StockSorties = () => {
               Showing {indexOfFirstSort + 1} to {Math.min(indexOfLastSort, filteredSorties.length)} of {filteredSorties.length} entries
             </div>
             <div className="pagination">
-              <button
-                onClick={() => paginate(currentPage - 1)}
-                disabled={currentPage === 1}
-                className="page-btn"
-              >
+              <button onClick={() => paginate(currentPage - 1)} disabled={currentPage === 1} className="page-btn">
                 ← Previous
               </button>
               {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
@@ -337,11 +405,7 @@ const StockSorties = () => {
                   </button>
                 );
               })}
-              <button
-                onClick={() => paginate(currentPage + 1)}
-                disabled={currentPage === totalPages}
-                className="page-btn"
-              >
+              <button onClick={() => paginate(currentPage + 1)} disabled={currentPage === totalPages} className="page-btn">
                 Next →
               </button>
             </div>
@@ -349,13 +413,14 @@ const StockSorties = () => {
         )}
       </div>
 
-      {/* Modal Add/View */}
+      {/* Modal Add/Edit/View */}
       {isModalOpen && (
         <div className="modal-overlay">
           <div className="modal">
             <div className="modal-header">
               <h2>
                 {modalMode === 'add' && 'Add New Stock Exit'}
+                {modalMode === 'edit' && 'Edit Stock Exit'}
                 {modalMode === 'view' && 'Exit Details'}
               </h2>
               <button className="modal-close" onClick={() => setIsModalOpen(false)}>✕</button>
@@ -364,71 +429,30 @@ const StockSorties = () => {
             <div className="modal-body">
               {modalMode === 'view' ? (
                 <>
-                  <div className="view-field">
-                    <label>Num Bon Sortie</label>
-                    <p>{selectedSortie?.num_bon_sortie}</p>
-                  </div>
-                  <div className="view-field">
-                    <label>Date Sortie</label>
-                    <p>{new Date(selectedSortie?.date_sortie).toLocaleDateString()}</p>
-                  </div>
-                  <div className="view-field">
-                    <label>Article</label>
-                    <p>{getArticleName(selectedSortie?.article_id)}</p>
-                  </div>
-                  <div className="view-field">
-                    <label>Code Article</label>
-                    <p>{getArticleCode(selectedSortie?.article_id)}</p>
-                  </div>
-                  <div className="view-field">
-                    <label>Quantité Sortie</label>
-                    <p>{selectedSortie?.qantite_sortie?.toLocaleString()} units</p>
-                  </div>
-                  <div className="view-field">
-                    <label>Prix Sortie</label>
-                    <p>${parseFloat(selectedSortie?.prix_sortie || 0).toFixed(2)}</p>
-                  </div>
-                  <div className="view-field">
-                    <label>Valeur Totale</label>
-                    <p className="total-field">
-                      ${(selectedSortie?.qantite_sortie * selectedSortie?.prix_sortie).toLocaleString()}
-                    </p>
-                  </div>
-                  <div className="view-field">
-                    <label>Stock Restant</label>
-                    <p className="stock-field">{getArticleStock(selectedSortie?.article_id)} units</p>
-                  </div>
+                  <div className="view-field"><label>Num Bon Sortie</label><p>{selectedSortie?.num_bon_sortie}</p></div>
+                  <div className="view-field"><label>Date Sortie</label><p>{new Date(selectedSortie?.date_sortie).toLocaleDateString()}</p></div>
+                  <div className="view-field"><label>Article</label><p>{getArticleName(selectedSortie?.article_id)}</p></div>
+                  <div className="view-field"><label>Code Article</label><p>{getArticleCode(selectedSortie?.article_id)}</p></div>
+                  <div className="view-field"><label>Quantité Sortie</label><p>{selectedSortie?.qantite_sortie?.toLocaleString()} units</p></div>
+                  <div className="view-field"><label>Prix Sortie</label><p>{parseFloat(selectedSortie?.prix_sortie || 0).toFixed(2)} DH</p></div>
+                  <div className="view-field"><label>Valeur Totale</label><p className="total-field">{(selectedSortie?.qantite_sortie * selectedSortie?.prix_sortie).toLocaleString()} DH</p></div>
+                  <div className="view-field"><label>Stock Restant</label><p className="stock-field">{getArticleStock(selectedSortie?.article_id)} units</p></div>
                 </>
               ) : (
                 <>
                   <div className="form-group">
                     <label>Num Bon Sortie *</label>
-                    <input
-                      type="text"
-                      name="num_bon_sortie"
-                      value={formData.num_bon_sortie}
-                      onChange={handleInputChange}
-                      placeholder="Ex: #BS-2024-001"
-                    />
+                    <input type="text" name="num_bon_sortie" value={formData.num_bon_sortie} onChange={handleInputChange} placeholder="Ex: #BS-2024-001" />
                   </div>
 
                   <div className="form-group">
                     <label>Date Sortie *</label>
-                    <input
-                      type="date"
-                      name="date_sortie"
-                      value={formData.date_sortie}
-                      onChange={handleInputChange}
-                    />
+                    <input type="date" name="date_sortie" value={formData.date_sortie} onChange={handleInputChange} />
                   </div>
 
                   <div className="form-group">
                     <label>Article *</label>
-                    <select
-                      name="article_id"
-                      value={formData.article_id}
-                      onChange={handleInputChange}
-                    >
+                    <select name="article_id" value={formData.article_id} onChange={handleInputChange}>
                       <option value="">Select an article</option>
                       {articles.map(article => (
                         <option key={article.id} value={article.id}>
@@ -440,28 +464,14 @@ const StockSorties = () => {
 
                   <div className="form-group">
                     <label>Quantité Sortie *</label>
-                    <input
-                      type="number"
-                      name="qantite_sortie"
-                      value={formData.qantite_sortie}
-                      onChange={handleInputChange}
-                      placeholder="Enter quantity"
-                    />
+                    <input type="number" name="qantite_sortie" value={formData.qantite_sortie} onChange={handleInputChange} placeholder="Enter quantity" />
                   </div>
 
                   <div className="form-group">
                     <label>Prix Sortie *</label>
-                    <input
-                      type="number"
-                      step="0.01"
-                      name="prix_sortie"
-                      value={formData.prix_sortie}
-                      onChange={handleInputChange}
-                      placeholder="Enter price per unit"
-                    />
+                    <input type="number" step="0.01" name="prix_sortie" value={formData.prix_sortie} onChange={handleInputChange} placeholder="Enter price per unit" />
                   </div>
 
-                  {/* Stock Status Display */}
                   {stockStatus.message && (
                     <div className={`stock-status ${stockStatus.available ? 'available' : 'insufficient'}`}>
                       {stockStatus.message}
@@ -471,7 +481,7 @@ const StockSorties = () => {
                   {formData.qantite_sortie && formData.prix_sortie && (
                     <div className="preview-total">
                       <label>Valeur Totale:</label>
-                      <p>${(parseFloat(formData.qantite_sortie) * parseFloat(formData.prix_sortie)).toLocaleString()}</p>
+                      <p>{(parseFloat(formData.qantite_sortie) * parseFloat(formData.prix_sortie)).toLocaleString()} DH</p>
                     </div>
                   )}
                 </>
@@ -481,22 +491,18 @@ const StockSorties = () => {
             <div className="modal-footer">
               {modalMode === 'add' && (
                 <>
-                  <button 
-                    className="btn-submit" 
-                    onClick={createSortie}
-                    disabled={!stockStatus.available && formData.qantite_sortie > 0}
-                  >
-                    Create Exit
-                  </button>
-                  <button className="btn-cancel" onClick={() => setIsModalOpen(false)}>
-                    Cancel
-                  </button>
+                  <button className="btn-submit" onClick={createSortie}>Create Exit</button>
+                  <button className="btn-cancel" onClick={() => setIsModalOpen(false)}>Cancel</button>
+                </>
+              )}
+              {modalMode === 'edit' && (
+                <>
+                  <button className="btn-submit" onClick={updateSortie}>Update Exit</button>
+                  <button className="btn-cancel" onClick={() => setIsModalOpen(false)}>Cancel</button>
                 </>
               )}
               {modalMode === 'view' && (
-                <button className="btn-submit" onClick={() => setIsModalOpen(false)}>
-                  Close
-                </button>
+                <button className="btn-submit" onClick={() => setIsModalOpen(false)}>Close</button>
               )}
             </div>
           </div>

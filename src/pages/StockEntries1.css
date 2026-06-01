@@ -630,3 +630,10 @@ body {
     font-size: 13px;
   }
 }
+.action-btn.edit {
+  color: #f59e0b;
+}
+.action-btn.edit:hover {
+  background: rgba(245, 158, 11, 0.1);
+  transform: scale(1.1);
+}

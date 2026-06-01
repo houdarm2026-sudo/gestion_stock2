@@ -1,7 +1,9 @@
+import { FaStar, FaRocket, FaBoxOpen, FaMagic, FaBullseye, FaChartLine, FaRegCheckCircle } from "react-icons/fa";
+import { FiPackage, FiDownload, FiUpload, FiHome } from 'react-icons/fi';
 import React from 'react';
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
-const Acceuil = () => {
+const Accueil = () => {
   const navigate = useNavigate();
 
   const styles = {
@@ -29,20 +31,6 @@ const Acceuil = () => {
       WebkitBackgroundClip: "text",
       WebkitTextFillColor: "transparent",
       cursor: "pointer"
-    },
-    nav: {
-      display: "flex",
-      gap: "35px",
-      alignItems: "center"
-    },
-    navLink: {
-      textDecoration: "none",
-      color: "#334155",
-      fontSize: "16px",
-      fontWeight: "500",
-      transition: "all 0.3s",
-      cursor: "pointer",
-      padding: "8px 0"
     },
     btnDemo: {
       background: "linear-gradient(135deg, #22c55e, #3b82f6)",
@@ -102,23 +90,13 @@ const Acceuil = () => {
       transition: "all 0.3s",
       boxShadow: "0 4px 15px rgba(34, 197, 94, 0.3)"
     },
-    btnSecondary: {
-      backgroundColor: "transparent",
-      color: "#3b82f6",
-      border: "2px solid #3b82f6",
-      padding: "12px 32px",
-      borderRadius: "40px",
-      fontSize: "16px",
-      fontWeight: "600",
-      cursor: "pointer",
-      transition: "all 0.3s"
-    },
     trustBadges: {
       display: "flex",
       gap: "20px",
       justifyContent: "center",
       fontSize: "14px",
-      color: "#22c55e"
+      color: "#22c55e",
+      flexWrap: "wrap"
     },
     heroImage: {
       flex: 1,
@@ -152,7 +130,10 @@ const Acceuil = () => {
       padding: "8px 16px",
       backgroundColor: "white",
       borderRadius: "30px",
-      boxShadow: "0 2px 8px rgba(0,0,0,0.05)"
+      boxShadow: "0 2px 8px rgba(0,0,0,0.05)",
+      display: "flex",
+      alignItems: "center",
+      gap: "6px"
     },
     features: {
       padding: "60px 40px",
@@ -184,7 +165,8 @@ const Acceuil = () => {
     },
     icon: {
       fontSize: "52px",
-      marginBottom: "20px"
+      marginBottom: "20px",
+      color: "#22c55e"
     },
     testimonial: {
       background: "linear-gradient(135deg, #22c55e, #3b82f6)",
@@ -275,10 +257,6 @@ const Acceuil = () => {
   };
 
   // Hover handlers
-  const handleNavHover = (e, isEnter) => {
-    e.target.style.color = isEnter ? "#22c55e" : "#334155";
-  };
-
   const handleBtnPrimaryHover = (e, isEnter) => {
     if (isEnter) {
       e.target.style.transform = "translateY(-2px)";
@@ -311,43 +289,9 @@ const Acceuil = () => {
 
   return (
     <div style={styles.container}>
-      {/* Header */}
+      {/* Header - seulement logo et connexion */}
       <header style={styles.header}>
         <div style={styles.logo} onClick={() => navigate("/")}>📦 StockFlow</div>
-        <nav style={styles.nav}>
-          <Link 
-            to="/" 
-            style={{ ...styles.navLink, fontWeight: "bold", color: "#22c55e" }}
-            onMouseEnter={(e) => handleNavHover(e, true)}
-            onMouseLeave={(e) => handleNavHover(e, false)}
-          >
-            Accueil
-          </Link>
-          <Link 
-            to="/solutions" 
-            style={styles.navLink}
-            onMouseEnter={(e) => handleNavHover(e, true)}
-            onMouseLeave={(e) => handleNavHover(e, false)}
-          >
-            Solutions
-          </Link>
-          <Link 
-            to="/tarifs" 
-            style={styles.navLink}
-            onMouseEnter={(e) => handleNavHover(e, true)}
-            onMouseLeave={(e) => handleNavHover(e, false)}
-          >
-            Tarifs
-          </Link>
-          <Link 
-            to="/contact" 
-            style={styles.navLink}
-            onMouseEnter={(e) => handleNavHover(e, true)}
-            onMouseLeave={(e) => handleNavHover(e, false)}
-          >
-            Contact
-          </Link>
-        </nav>
         <button 
           style={styles.btnDemo}
           onClick={() => navigate("/connexion")}
@@ -367,9 +311,9 @@ const Acceuil = () => {
       {/* Hero Section */}
       <section style={styles.hero}>
         <div style={styles.heroContent}>
-          <h1 style={styles.heroTitle}>Optimisez la Gestion de votre Supermarché</h1>
+          <h1 style={styles.heroTitle}>Optimisez la Gestion de votre Stock</h1>
           <p style={styles.subtitle}>
-            Pilotez en temps réel vos stocks, vos ventes et vos approvisionnements 
+            Pilotez en temps réel vos stocks, vos entrées et vos sorties
             grâce à une solution intuitive et puissante.
           </p>
           <div style={styles.heroButtons}>
@@ -381,41 +325,32 @@ const Acceuil = () => {
             >
               Commencer gratuitement
             </button>
-            <button 
-              style={styles.btnSecondary}
-              onClick={() => navigate("/contact")}
-              onMouseEnter={handleBtnSecondaryHover}
-              onMouseLeave={handleBtnSecondaryHover}
-            >
-              Voir la démo
-            </button>
           </div>
           <div style={styles.trustBadges}>
-            <span>✅ Sans engagement</span>
-            <span>⭐ 14 jours d'essai gratuit</span>
-            <span>🚀 Support 24/7</span>
+            <span><FaRegCheckCircle style={{ marginRight: "6px", color: "#22c55e" }}/> Sans engagement</span>
+            <span><FaStar style={{ marginRight: "6px", color: "#facc15" }}/> 14 jours d'essai gratuit</span>
+            <span><FaRocket style={{ marginRight: "6px", color: "#3b82f6" }}/> Support 24/7</span>
           </div>
         </div>
 
         <div style={styles.heroImage}>
           <img 
-            src="https://images.unsplash.com/photo-1542838132-92c53300491e?w=600&h=500&fit=crop"
-            alt="Supermarché"
+src="https://tse3.mm.bing.net/th/id/OIP.MbpqqYt7Yy0yzmREU9a9dQHaEO?r=0&cb=thfc1falcon&rs=1&pid=ImgDetMain&o=7&rm=3"          alt="Entrepôt de stock"
             style={styles.image}
           />
         </div>
       </section>
 
-      {/* Trusted by */}
+      {/* Pourquoi choisir StockFlow */}
       <div style={styles.trustedBy}>
         <p style={{ fontSize: "20px", fontWeight: "bold", background: "linear-gradient(135deg, #22c55e, #3b82f6)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
           Pourquoi choisir StockFlow ?
         </p>
         <div style={styles.brands}>
-          <span style={styles.brandItem}>📦 Gestion intelligente</span>
-          <span style={styles.brandItem}>✨ Interface moderne</span>
-          <span style={styles.brandItem}>🎯 Solution complète</span>
-          <span style={styles.brandItem}>📊 Analytics avancés</span>
+          <span style={styles.brandItem}><FaBoxOpen style={{ marginRight: "6px", color: "#3b82f6" }} /> Gestion intelligente</span>
+          <span style={styles.brandItem}><FaMagic style={{ marginRight: "6px", color: "#a855f7" }} /> Interface moderne</span>
+          <span style={styles.brandItem}><FaBullseye style={{ marginRight: "6px", color: "#ef4444" }} /> Solution complète</span>
+          <span style={styles.brandItem}><FaChartLine style={{ marginRight: "6px", color: "#22c55e" }} /> Analytics avancés</span>
         </div>
       </div>
 
@@ -424,24 +359,27 @@ const Acceuil = () => {
         <h2 style={styles.sectionTitle}>Tout ce dont vous avez besoin</h2>
         <div style={styles.featuresGrid}>
           <div style={styles.featureCard} onMouseEnter={handleCardHover} onMouseLeave={handleCardHover}>
-            <div style={styles.icon}>📦</div>
-            <h3 style={{ color: "#166534", marginBottom: "12px" }}>Inventaire Temps Réel</h3>
-            <p style={{ color: "#64748b" }}>Suivez vos stocks en direct avec alertes automatiques</p>
+            <div style={styles.icon}><FiPackage size={45} /></div>
+            <h3 style={{ color: "#166534", marginBottom: "12px" }}>Gestion des Articles</h3>
+            <p style={{ color: "#64748b" }}>Ajoutez, modifiez et suivez vos produits facilement en temps réel</p>
           </div>
+
           <div style={styles.featureCard} onMouseEnter={handleCardHover} onMouseLeave={handleCardHover}>
-            <div style={styles.icon}>🤖</div>
-            <h3 style={{ color: "#166534", marginBottom: "12px" }}>Alertes Intelligentes</h3>
-            <p style={{ color: "#64748b" }}>Anticipez les besoins avec l'IA</p>
+            <div style={styles.icon}><FiDownload size={45} /></div>
+            <h3 style={{ color: "#166534", marginBottom: "12px" }}>Entrées de Stock</h3>
+            <p style={{ color: "#64748b" }}>Gérez les arrivages et augmentez automatiquement vos quantités</p>
           </div>
+
           <div style={styles.featureCard} onMouseEnter={handleCardHover} onMouseLeave={handleCardHover}>
-            <div style={styles.icon}>📊</div>
-            <h3 style={{ color: "#166534", marginBottom: "12px" }}>Rapports Avancés</h3>
-            <p style={{ color: "#64748b" }}>Analysez vos performances</p>
+            <div style={styles.icon}><FiUpload size={45} /></div>
+            <h3 style={{ color: "#166534", marginBottom: "12px" }}>Sorties de Stock</h3>
+            <p style={{ color: "#64748b" }}>Contrôlez les sorties avec vérification automatique du stock</p>
           </div>
+
           <div style={styles.featureCard} onMouseEnter={handleCardHover} onMouseLeave={handleCardHover}>
-            <div style={styles.icon}>🔄</div>
-            <h3 style={{ color: "#166534", marginBottom: "12px" }}>Multi-Sites</h3>
-            <p style={{ color: "#64748b" }}>Gérez plusieurs magasins</p>
+            <div style={styles.icon}><FiHome size={45} /></div>
+            <h3 style={{ color: "#166534", marginBottom: "12px" }}>Dashboard Intelligent</h3>
+            <p style={{ color: "#64748b" }}>Visualisez statistiques, alertes et performance en temps réel</p>
           </div>
         </div>
       </section>
@@ -450,18 +388,18 @@ const Acceuil = () => {
       <section style={styles.testimonial}>
         <div style={styles.stars}>★★★★★</div>
         <blockquote style={styles.blockquote}>
-          "Depuis que nous utilisons StockFlow, nos pertes liées aux produits périmés ont chuté de 45% et nos employés gagnent 2 heures par jour sur les inventaires."
+          "Depuis que nous utilisons StockFlow, nos pertes ont chuté de 45% et nos employés gagnent 2 heures par jour sur les inventaires."
         </blockquote>
-        <p style={{ marginTop: "30px", fontWeight: "600" }}>- Directeur HyperMarket</p>
+        <p style={{ marginTop: "30px", fontWeight: "600" }}>- Directeur d'entrepôt</p>
       </section>
 
       {/* CTA Section */}
       <section style={styles.cta}>
         <h2 style={{ fontSize: "32px", background: "linear-gradient(135deg, #166534, #1e40af)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
-          Prêt à moderniser votre supermarché ?
+          Prêt à optimiser votre gestion de stock ?
         </h2>
         <p style={{ fontSize: "18px", color: "#475569", marginTop: "16px" }}>
-          Rejoignez plus de 500 magasins qui font confiance à StockFlow
+          Rejoignez plus de 500 entreprises qui font confiance à StockFlow
         </p>
         <div style={styles.ctaButtons}>
           <button 
@@ -471,14 +409,6 @@ const Acceuil = () => {
             onMouseLeave={handleBtnPrimaryHover}
           >
             Commencer l'essai gratuit
-          </button>
-          <button 
-            style={styles.btnOutline}
-            onClick={() => navigate("/contact")}
-            onMouseEnter={handleBtnSecondaryHover}
-            onMouseLeave={handleBtnSecondaryHover}
-          >
-            Contacter un expert
           </button>
         </div>
         <p style={{ marginTop: "30px", color: "#22c55e", fontWeight: "500" }}>✨ Essai de 14 jours, sans engagement ✨</p>
@@ -495,12 +425,6 @@ const Acceuil = () => {
               </p>
             </div>
             <div>
-              <h4 style={styles.footerTitle}>Produit</h4>
-              <p style={styles.footerLink} onClick={() => navigate("/solutions")}>Fonctionnalités</p>
-              <p style={styles.footerLink} onClick={() => navigate("/tarifs")}>Tarification</p>
-              <p style={styles.footerLink}>Intégrations</p>
-            </div>
-            <div>
               <h4 style={styles.footerTitle}>Entreprise</h4>
               <p style={styles.footerLink}>À propos</p>
               <p style={styles.footerLink}>Blog</p>
@@ -509,8 +433,8 @@ const Acceuil = () => {
             <div>
               <h4 style={styles.footerTitle}>Support</h4>
               <p style={styles.footerLink}>Centre d'aide</p>
-              <p style={styles.footerLink} onClick={() => navigate("/contact")}>Contact</p>
-              <p style={styles.footerLink}>API Documentation</p>
+              <p style={styles.footerLink}>Documentation</p>
+              <p style={styles.footerLink}>API</p>
             </div>
           </div>
           <div style={styles.footerBottom}>
@@ -522,4 +446,4 @@ const Acceuil = () => {
   );
 };
 
-export default Acceuil;
+export default Accueil;

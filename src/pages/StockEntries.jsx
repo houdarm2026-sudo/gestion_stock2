@@ -1,5 +1,4 @@
-import {FiEye,FiTrash2,FiDollarSign,FiBarChart2 ,FiPackage } from 'react-icons/fi';
-import './StockEntries1.css';
+import { FiEye, FiTrash2, FiEdit2, FiDollarSign, FiBarChart2, FiPackage, FiSearch } from 'react-icons/fi';import './StockEntries1.css';
 import { useState, useEffect } from "react";
 import axios from "axios";
 import { toast, Toaster } from 'react-hot-toast';
@@ -84,6 +83,13 @@ const StockEntries = () => {
       [e.target.name]: e.target.value
     });
   };
+  const handleSubmit = () => {
+  if (modalMode === 'add') {
+    createEntry();
+  } else if (modalMode === 'edit') {
+    updateEntry();
+  }
+};
 
   const resetForm = () => {
     setFormData({
@@ -100,7 +106,18 @@ const StockEntries = () => {
     resetForm();
     setIsModalOpen(true);
   };
-
+const openEditModal = (entry) => {
+  setModalMode('edit');
+  setSelectedEntry(entry);
+  setFormData({
+    num_bon_entree: entry.num_bon_entree,
+    date_entree: entry.date_entree.split('T')[0], 
+    article_id: entry.article_id,
+    qantite_entree: entry.qantite_entree,
+    prix_entree: entry.prix_entree,
+  });
+  setIsModalOpen(true);
+};
   const openViewModal = (entry) => {
     setModalMode('view');
     setSelectedEntry(entry);
@@ -130,7 +147,31 @@ const StockEntries = () => {
       }
     }
   };
+  //Edit 
+const updateEntry = async () => {
+  if (!formData.num_bon_entree || !formData.date_entree || !formData.article_id || !formData.qantite_entree || !formData.prix_entree) {
+    toast.error('Please fill in all fields');
+    return;
+  }
 
+  try {
+    const response = await api.put(`/entrees/${selectedEntry.id}`, {
+      num_bon_entree: formData.num_bon_entree,
+      date_entree: formData.date_entree,
+      article_id: parseInt(formData.article_id),
+      qantite_entree: parseInt(formData.qantite_entree),
+      prix_entree: parseFloat(formData.prix_entree)
+    });
+    
+    toast.success('Entry updated successfully!');
+    fetchEntries();
+    setIsModalOpen(false);
+    resetForm();
+  } catch (error) {
+    console.error(error);
+    toast.error(error.response?.data?.message || 'Failed to update entry');
+  }
+};
   // Delete entry
   const deleteEntry = async () => {
     try {
@@ -169,18 +210,37 @@ const StockEntries = () => {
         </div>
 
         {/* Search */}
-        <div className="search-wrapper">
-          <input
-            type="text"
-            placeholder="🔍 Search by entry number or article..."
-            value={searchTerm}
-            onChange={(e) => {
-              setSearchTerm(e.target.value);
-              setCurrentPage(1);
-            }}
-            className="search-input"
-          />
-        </div>
+       <div style={{ position: "relative", display: "inline-block" }}>
+  <div style={{ position: "absolute", left: "12px", top: "50%", transform: "translateY(-50%)", color: "#888", pointerEvents: "none", display: "flex", alignItems: "center" }}>
+    <FiSearch size={18} />
+  </div>
+  <input
+    type="text"
+    placeholder="Search by entry number or article..."
+    value={searchTerm}
+    onChange={(e) => {
+      setSearchTerm(e.target.value);
+      setCurrentPage(1);
+    }}
+    style={{
+      width: "1000px",
+      padding: "10px 10px 10px 36px",
+      border: "1px solid #ccc",
+      borderRadius: "8px",
+      fontSize: "14px",
+      outline: "none",
+      transition: "all 0.2s ease"
+    }}
+    onFocus={(e) => {
+      e.target.style.borderColor = "#007bff";
+      e.target.style.boxShadow = "0 0 0 2px rgba(0, 123, 255, 0.25)";
+    }}
+    onBlur={(e) => {
+      e.target.style.borderColor = "#ccc";
+      e.target.style.boxShadow = "none";
+    }}
+  />
+</div>
       </div>
 
       {/* Stats Cards */}
@@ -251,12 +311,19 @@ const StockEntries = () => {
                     <td>{new Date(entry.date_entree).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}</td>
                     <td>{getArticleName(entry.article_id)}</td>
                     <td>{entry.qantite_entree?.toLocaleString()} units</td>
-                    <td>${parseFloat(entry.prix_entree || 0).toFixed(2)}</td>
-                    <td className="total-cell">${totalValue.toLocaleString()}</td>
-                    <td className="actions-cell">
-                      <button className="action-btn view" onClick={() => openViewModal(entry)}><FiEye size={18}/></button>
-                      <button className="action-btn delete" onClick={() => setDeleteConfirm(entry)}><FiTrash2 size={18}/></button>
-                    </td>
+                    <td>{parseFloat(entry.prix_entree || 0).toFixed(2)} Dh</td>
+                    <td className="total-cell">{totalValue.toLocaleString()} Dh</td>
+                   <td className="actions-cell">
+  <button className="action-btn view" onClick={() => openViewModal(entry)}>
+    <FiEye size={18} />
+  </button>
+  <button className="action-btn edit" onClick={() => openEditModal(entry)}>
+    <FiEdit2 size={18} />
+  </button>
+  <button className="action-btn delete" onClick={() => setDeleteConfirm(entry)}>
+    <FiTrash2 size={18} />
+  </button>
+</td>
                   </tr>
                 );
               })
@@ -315,13 +382,15 @@ const StockEntries = () => {
       {isModalOpen && (
         <div className="modal-overlay">
           <div className="modal">
-            <div className="modal-header">
-              <h2>
-                {modalMode === 'add' && 'Add New Stock Entry'}
-                {modalMode === 'view' && 'Entry Details'}
-              </h2>
-              <button className="modal-close" onClick={() => setIsModalOpen(false)}>✕</button>
-            </div>
+           {/* Modifiez cette section dans le modal-header */}
+<div className="modal-header">
+  <h2>
+    {modalMode === 'add' && 'Add New Stock Entry'}
+    {modalMode === 'edit' && 'Edit Stock Entry'}  {/* Ajoutez cette ligne */}
+    {modalMode === 'view' && 'Entry Details'}
+  </h2>
+  <button className="modal-close" onClick={() => setIsModalOpen(false)}>✕</button>
+</div>
 
             <div className="modal-body">
               {modalMode === 'view' ? (
@@ -344,7 +413,7 @@ const StockEntries = () => {
                   </div>
                   <div className="view-field">
                     <label>Prix Entrée</label>
-                    <p>${parseFloat(selectedEntry?.prix_entree || 0).toFixed(2)}</p>
+                    <p>{parseFloat(selectedEntry?.prix_entree || 0).toFixed(2)}Dh</p>
                   </div>
                   <div className="view-field">
                     <label>Valeur Totale</label>
@@ -430,23 +499,33 @@ const StockEntries = () => {
               )}
             </div>
 
-            <div className="modal-footer">
-              {modalMode === 'add' && (
-                <>
-                  <button className="btn-submit" onClick={createEntry}>
-                    Create Entry
-                  </button>
-                  <button className="btn-cancel" onClick={() => setIsModalOpen(false)}>
-                    Cancel
-                  </button>
-                </>
-              )}
-              {modalMode === 'view' && (
-                <button className="btn-submit" onClick={() => setIsModalOpen(false)}>
-                  Close
-                </button>
-              )}
-            </div>
+           <div className="modal-footer">
+  {modalMode === 'add' && (
+    <>
+      <button className="btn-submit" onClick={createEntry}>
+        Create Entry
+      </button>
+      <button className="btn-cancel" onClick={() => setIsModalOpen(false)}>
+        Cancel
+      </button>
+    </>
+  )}
+  {modalMode === 'edit' && (
+    <>
+      <button className="btn-submit" onClick={updateEntry}>
+        Update Entry
+      </button>
+      <button className="btn-cancel" onClick={() => setIsModalOpen(false)}>
+        Cancel
+      </button>
+    </>
+  )}
+  {modalMode === 'view' && (
+    <button className="btn-submit" onClick={() => setIsModalOpen(false)}>
+      Close
+    </button>
+  )}
+</div>
           </div>
         </div>
       )}

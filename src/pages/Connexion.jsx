@@ -69,7 +69,7 @@ const Connexion = () => {
               <label>Email professionnel</label>
               <input
                 type="email"
-                placeholder="exemple@entreprise.com"
+                placeholder="exemple@gmail.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
@@ -92,9 +92,7 @@ const Connexion = () => {
             </button>
           </form>
           
-          <div className="login-footer">
-            <p>Pas de compte ? <a href="/contact">Contacter l'administrateur</a></p>
-          </div>
+          
           
          
         </div>

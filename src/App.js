@@ -1,11 +1,10 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import './App.css';
+
 import Acceuil from './pages/Acceuil';
 import Connexion from './pages/Connexion';
-import Solution from './pages/Solution';
-import Tarif from './pages/Tarif';
-import Contact from './pages/Contact';
+import Solutions from './pages/Solutions';
 import Dashboard from './pages/Dashboard';
 import ArticleManager from './pages/ArticleManager';
 import StockEntries from './pages/StockEntries';
@@ -13,7 +12,7 @@ import StockSorties from './pages/StockSorties';
 import Sidebar from './components/Layout/Sidebar';
 import Navbar from './components/Layout/Navbar';
 
-// Layout pour les pages avec Sidebar et Navbar
+// Layout pour pages dashboard
 const AppLayout = ({ children }) => {
   return (
     <div className='app'>
@@ -32,40 +31,39 @@ function App() {
   return (
     <Router>
       <Routes>
-        {/* Pages sans Sidebar ni Navbar */}
+
+        {/*  Public pages */}
         <Route path="/" element={<Acceuil />} />
-        <Route path="/solution" element={<Solution />} />
-        <Route path="/tarif" element={<Tarif />} />
-        <Route path="/contact" element={<Contact />} />
-        <Route path="/connexion" element={<Connexion />} />
+        <Route path="/solutions" element={<Solutions />} />
         
-        {/* Pages avec Sidebar et Navbar */}
+        <Route path="/connexion" element={<Connexion />} />
+
+        {/*  Dashboard pages */}
         <Route path="/dashboard" element={
           <AppLayout>
             <Dashboard />
           </AppLayout>
         } />
-        
+
         <Route path="/articles" element={
           <AppLayout>
             <ArticleManager />
           </AppLayout>
         } />
-        
+
         <Route path="/stock-entries" element={
           <AppLayout>
             <StockEntries />
           </AppLayout>
         } />
-        
+
         <Route path="/stock-exits" element={
           <AppLayout>
             <StockSorties />
           </AppLayout>
         } />
-        <Route path="/solutions" element={<Solution />} />
-<Route path="/tarifs" element={<Tarif/>} />
-<Route path="/contact" element={<Contact />} />
+
+
       </Routes>
     </Router>
   );
